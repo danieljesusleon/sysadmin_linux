@@ -1,0 +1,27 @@
+dn: cn=jborges,ou=Group,dc=example,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: jborges
+userPassword: {crypt}x
+gidNumber: 1000
+
+dn: cn=esabato,ou=Group,dc=example,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: esabato
+userPassword: {crypt}x
+gidNumber: 1001
+
+dn: cn=socampo,ou=Group,dc=example,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: socampo
+userPassword: {crypt}x
+gidNumber: 1002
+
+dn: cn=astorni,ou=Group,dc=example,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: astorni
+userPassword: {crypt}x
+gidNumber: 1003
