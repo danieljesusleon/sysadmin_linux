@@ -1,0 +1,71 @@
+dn: uid=jborges,ou=People,dc=example,dc=com
+uid: jborges
+cn: Jorge Luis Borges
+objectClass: account
+objectClass: posixAccount
+objectClass: top
+objectClass: shadowAccount
+userPassword: jborges
+shadowLastChange: 16546
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+loginShell: /bin/bash
+uidNumber: 1000
+gidNumber: 1000
+homeDirectory: /home/jborges
+gecos: Jorge Luis Borges
+
+dn: uid=esabato,ou=People,dc=example,dc=com
+uid: esabato
+cn: Ernesto Sabato
+objectClass: account
+objectClass: posixAccount
+objectClass: top
+objectClass: shadowAccount
+userPassword: esabato
+shadowLastChange: 16546
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+loginShell: /bin/bash
+uidNumber: 1001
+gidNumber: 1001
+homeDirectory: /home/esabato
+gecos: Julio Cortazar
+
+dn: uid=socampo,ou=People,dc=example,dc=com
+uid: socampo
+cn: Silvina Ocampo
+objectClass: account
+objectClass: posixAccount
+objectClass: top
+objectClass: shadowAccount
+userPassword: socampo
+shadowLastChange: 16546
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+loginShell: /bin/bash
+uidNumber: 1002
+gidNumber: 1002
+homeDirectory: /home/socampo
+gecos: Silvina Ocampo
+
+dn: uid=astorni,ou=People,dc=example,dc=com
+uid: astorni
+cn: Alfonsina Storni
+objectClass: account
+objectClass: posixAccount
+objectClass: top
+objectClass: shadowAccount
+userPassword: astorni
+shadowLastChange: 16546
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+loginShell: /bin/bash
+uidNumber: 1003
+gidNumber: 1003
+homeDirectory: /home/astorni
+gecos: Alfonsina Storni
