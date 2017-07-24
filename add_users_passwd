@@ -1,0 +1,9 @@
+#!/bin/bash
+# This script adds new users in the file /etc/passwd
+
+while IFS='' read -r line || [[ -n "$line" ]]; do
+	username=$line
+	echo "Adding to the user: $username" 
+	useradd $username	
+	cat /etc/passwd |grep $username
+done < "$1"
