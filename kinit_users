@@ -1,0 +1,10 @@
+#!/bin/bash
+# This script requests a kerberos ticket for each user in the file userlist
+
+while IFS='' read -r line || [[ -n "$line" ]]; do
+	username=$line
+	su - $username
+	echo -e "manager\n" |kinit
+	klist	
+  echo -e "exit\n"
+done < "$1"
