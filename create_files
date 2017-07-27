@@ -1,0 +1,7 @@
+#!/bin/bash
+for i in {001..100}
+do
+        dd if=/dev/zero of="$i"zender.data count=1024 bs=1
+        echo $i
+done
+~
