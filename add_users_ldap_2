@@ -1,0 +1,30 @@
+#!/bin/bash
+# This script adds new users to an ldap
+cat /etc/passwd |grep -v 'tss' |grep 'xender' > etc_passwd
+
+function readfile {
+while IFS='' read -r line || [[ -n "$line" ]]; do
+        username=$(echo "$line"  |awk -F: '{print$1}')
+        uidnumber=$(echo "$line" |awk -F: '{print$3}')
+        guidnumber=$(echo "$line" |awk -F: '{print$4}')
+        home=$(echo "$line" |awk -F: '{print$6}')
+# Entering data into the file users.ldif
+        echo "dn: cn=$username,ou=People,dc=jungle,dc=kvm" >> users.ldif
+        echo "objectClass: posixAccount" >> users.ldif
+        echo "objectClass: account" >> users.ldif
+        echo "uid: $username" >> users.ldif
+        echo "cn: $username" >> users.ldif
+        echo "userPassword: manager" >> users.ldif
+        echo "loginShell: /bin/bash" >> users.ldif
+        echo "uidNumber: $uidnumber" >> users.ldif
+        echo "gidNumber: $guidnumber" >> users.ldif
+        echo "homeDirectory: /home/$username" >> users.ldif
+        echo "gecos: $username" >> users.ldif
+        echo "" >> users.ldif
+done < "$1"
+}
+
+readfile etc_passwd
+# Loading users to ldap
+
+ldapadd -x -w manager -D cn=Manager,dc=jungle,dc=kvm -f users.ldif
