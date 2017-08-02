@@ -1,0 +1,65 @@
+#!/bin/bash
+
+until [ "$op" == 3 ];do
+function menu {
+    echo "Please choice a option"
+    echo "--------------------------"
+    echo "1- Create new vhost"
+    echo "2- Create new vhost certificate"
+    echo "3- Exit"
+}
+
+
+menu
+    read op
+
+    case $op in
+        1)echo "Create new vhost:"
+          echo "----------------"
+          echo "Insert the name of the new vhost"
+		read VHOSTNAME
+		mkdir -p /web/$VHOSTNAME
+		touch /etc/httpd/conf.d/$VHOSTNAME.conf
+          echo "Insert the domain name to the new vhost, eg: mydoamin.com"
+		read DOMAINNAME
+          echo "Creating the new vhost"
+          echo "<VirtualHost *:80>" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "ServerName $VHOSTNAME.$DOMAINNAME" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "ServerAlias $DOMAINNAME" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "DocumentRoot /web/$VHOSTNAME" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "</VirtualHost>" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "<Directory "/web/$VHOSTNAME">" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "AllowOverride none" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "Require all granted" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "</Directory>" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "<VirtualHost *:80>" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "ServerName $VHOSTNAME.$DOMAINNAME" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "DocumentRoot /web/$VHOSTNAME" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+	  echo "</VirtualHost>" >> /etc/httpd/conf.d/$VHOSTNAME.conf
+# appen SELinux content
+	semanage fcontext -a -t httpd_sys_content_t "/web/$VHOSTNAME(/.*)?"
+	restorecon -Rv /web/$VHOSTNAME
+	systemctl restart httpd
+	systemctl status httpd
+	touch /web/$VHOSTNAME/index.html
+	  echo "This is the web $VHOSTNAME" >> /web/$VHOSTNAME/index.html 
+        ;;
+        2)echo "Create vhost certificates:"
+	  echo "insert the domain name, eg: mydomain.com"
+	  read DOMAINNAME
+	  echo "insert tha days toexpirate certificates"
+	  read DAYS
+	  echo -e "\t\n\t\n\t\nVE\tCaracas\tCaracas\tstrix\t\t\t\n" genkey --days $DAYS $DOMAINNAME
+        ;;
+        3)
+        clear
+        exit
+        ;;
+        *) echo "Invalid option"
+           sleep 2
+           clear
+            ;;
+    esac
+done
