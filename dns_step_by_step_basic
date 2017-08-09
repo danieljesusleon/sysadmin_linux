@@ -4,11 +4,11 @@ Step 1:	Install bind package and utilities needed
 #	yum -y install bind bind-utils vim-enhanced net-tools
 
 Step 2:	Set the hostname
-#	hostnamectl set-hostname "server.strix.com.ve"
+#	hostnamectl set-hostname "server.domain"
 #	hostname
 
 Step 3:	Edit file /etc/hosts
-#	echo "192.168.0.112	server.strix.com.ve" >> /etc/hosts 
+#	echo "192.168.0.112	server.domain" >> /etc/hosts 
 #	cat /etc/hosts
 
 Step 4:	Backup the named.conf file and copy templates file from /usr/share/doc/bind-*/sample/etc/ direcotry
@@ -26,7 +26,7 @@ Step 5:	Edit /etc/named.conf file
 	allow-query { 192.168.0.0/24; 127.0.0.1; };
 	};
 
-	zone "strix.com.ve" IN {
+	zone "FQIDN_domain" IN {
 		type master;
 		file "dns.for";
 		allow-update { none; };
@@ -46,44 +46,40 @@ Step 6:	Enter into /var/named/ directory and copy the templates file named.local
 	and edit it append the following information:
 	
 	$TTL 1D
-	@       IN SOA dns.strix.com.ve. root.strix.com.ve. (
+	@       IN SOA dns.domain. root.domain. (
                                         201708; serial
                                         1D; refresh
                                         1H; retry
                                         1W; expire
                                         3H ; minimum
 	)
-	@                       IN      NS      dns.strix.com.ve.
+	@                       IN      NS      dns.domain.
 	dns                     IN      A       192.168.0.112
 	@                       IN      A       192.168.0.112
-	drotaca-test            IN      A       192.168.0.21
-	db1                     IN      A       192.168.0.71
-	strixerp-local          IN      A       192.168.0.55
-	amazonas                IN      A       192.168.0.66
-	poraqui-api             IN      A       192.168.0.77
-
+	test		        IN      A       192.168.0.21
+	dbexample               IN      A       192.168.0.71
+	erp-local 	        IN      A       192.168.0.55
+	
 Step 7: Copy dns.for file to dns.rev (reverse)
 #	cp dns.for dns.rev
 #	vim dns.rev 
 	and put the following information:
 	$TTL 1D
-	@	IN SOA	 dns.strix.com.ve. root.strix.com.ve. (
+	@	IN SOA	 dns.domain. root.domain. (
 					0	; serial
 					1D	; refresh
 					1H	; retry
 					1W	; expire
 					3H )	; minimum
 
-	@                       IN      NS      dns.strix.com.ve.
+	@                       IN      NS      dns.domain.
 	@                       IN      A       192.168.0.112
-	@			IN	PTR	strix.com.ve.
-	112			IN	PTR	dns.strix.com.ve.
-	21                      IN      PTR     drotaca-test.strix.com.ve.
-	71			IN	PTR	db1.strix.com.ve.
-	55			IN	PTR	strixerp-local.strix.com.ve.
-	66	                IN      PTR     amazonas.strix.com.ve.
-	77		        IN      PTR     poraqui-api.strix.com.ve.
-
+	@			IN	PTR	domain.
+	112			IN	PTR	dns.domain.
+	21                      IN      PTR     test.domain.
+	71			IN	PTR	dbexample.domain.
+	55			IN	PTR	erp-local.domain.
+	
 Step 8:	Change the group owner files to named and check the configuration files
 #	ll
 #	chgrp named dns.for 
@@ -93,7 +89,7 @@ Step 8:	Change the group owner files to named and check the configuration files
 #	cd
 #	/usr/share/named-checkconf -z /etc/named.conf
 	the previous command should display the following:
-	zone strix.com.ve/IN: loaded serial 201708
+	zone domain/IN: loaded serial 201708
 	zone 0.168.192.in-addr.arpa/IN: loaded serial 0
 	zone localhost.localdomain/IN: loaded serial 0
 	zone localhost/IN: loaded serial 0
@@ -128,30 +124,4 @@ Step10:	Assing the boolean to the service, edit connection interface file and mo
 		nameserver 192.168.0.112
 #	cd
 
-Step11:	Make the test to verify the correct operation of service
-#	nslookup dns.strix.com.ve
-#	nslookup 192.168.0.112
-#	nslookup www.google.com
-#	nslookup 172.217.8.132
-#	nslookup www.dyn.com
-#	nslookup 159.203.57.3
-#	nslookup dns.strix.com.ve
-#	nslookup strix.com.ve
-#	nslookup www.strix.com.ve
-#	nslookup 192.168.0.112
-#	nslookup dns.strix.com.ve
-#	nslookup dns.strix.com.ve
-#	nslookup strix.com.ve
-#	nslookup 192.168.0.112
-#	nslookup dns.strix.com.ve
-#	nslookup 192.168.0.112
-#	nslookup drotaca.strix.com.ve
-#	nslookup drotacatest.strix.com.ve
-#	nslookup 192.168.0.21
-#	nslookup drotacatest.strix.com.ve
-#	nslookup 192.168.0.21
-#	nslookup 192.168.0.21
-#	nslookup db1.strix.com.ve
-#	nslookup 192.168.0.71
-#	nslookup poraqui-api.strix.com.ve
-#	nslookup 192.168.0.77
+Step11:	Make the test to verify the correct operation of service with the command "nslookup"
