@@ -1,0 +1,258 @@
+Ref:
+http://www.server-world.info/en/note?os=CentOS_7&p=openldap&f=1
+http://www.server-world.info/en/note?os=CentOS_7&p=openldap&f=3
+http://www.server-world.info/en/note?os=CentOS_7&p=openldap&f=4
+http://www.server-world.info/en/note?os=CentOS_6&p=samba&f=4
+http://www.study-area.org/tips/smbldap/
+https://wiki.samba.org/index.php/Required_settings_for_NT4-style_domains
+
+### Configure LDAP Server ###
+yum -y install openldap-servers openldap-clients
+cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+chown ldap. /var/lib/ldap/DB_CONFIG
+systemctl start slapd
+systemctl enable slapd
+slappasswd # copy the result
+mkdir /root/tmp
+cd /root/tmp
+vi chrootpw.ldif
+代碼: [選擇]
+
+dn: olcDatabase={0}config,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}xxxxxxxxxxxxxxxxxxxxxxxx
+
+ldapadd -Y EXTERNAL -H ldapi:/// -f chrootpw.ldif
+for i in /etc/openldap/schema/*.ldif; do ldapadd -Y EXTERNAL -H ldapi:/// -f $i ; done
+vi chdomain.ldif
+代碼: [選擇]
+
+dn: olcDatabase={1}monitor,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
+  read by dn.base="cn=Manager,dc=example,dc=com" read by * none
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=example,dc=com
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=Manager,dc=example,dc=com
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}xxxxxxxxxxxxxxxxxxxxxxxx
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcAccess
+olcAccess: {0}to attrs=userPassword,shadowLastChange by
+  dn="cn=Manager,dc=example,dc=com" write by anonymous auth by self write by * none
+olcAccess: {1}to dn.base="" by * read
+olcAccess: {2}to * by dn="cn=Manager,dc=example,dc=com" write by * read
+
+ldapmodify -Y EXTERNAL -H ldapi:/// -f chdomain.ldif
+vi basedomain.ldif
+代碼: [選擇]
+
+dn: dc=example,dc=com
+objectClass: top
+objectClass: dcObject
+objectclass: organization
+o: Example dot Com
+dc: Example
+
+dn: cn=Manager,dc=example,dc=com
+objectClass: organizationalRole
+cn: Manager
+description: Directory Manager
+
+dn: ou=People,dc=server,dc=world
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Group,dc=example,dc=com
+objectClass: organizationalUnit
+ou: Group
+
+ldapadd -x -D cn=Manager,dc=example,dc=com -W -f basedomain.ldif
+
+#-- skip this part if you don't want TLS --#
+# you MUST build your server key and cert first, the 'easy-ras' package should be a good idea
+# Assuming you've installed openvpn and easy-rsa
+cd /etc/openvpn/easy-rsa
+cp ldap.example.com.key ldap.example.com.crt ca.crt /etc/openldap/certs/
+cd /etc/openldap/certs/
+chown ldap. ldap.example.com.* ca.crt
+cd /root/tmp
+vi mod_ssl.ldif
+代碼: [選擇]
+
+dn: cn=config
+changetype: modify
+add: olcTLSCACertificateFile
+olcTLSCACertificateFile: /etc/openldap/certs/ca.crt
+-
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/openldap/certs/ldap.example.com.crt
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/certs/ldap.example.com.key
+
+ldapmodify -Y EXTERNAL -H ldapi:/// -f mod_ssl.ldif
+vi /etc/sysconfig/slapd
+代碼: [選擇]
+
+SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"
+
+#-- end of TLS configuration --#
+
+systemctl start slapd
+systemctl enable slapd
+
+### Configure Client ###
+#-- without TLS --#
+yum -y install openldap-clients nss-pam-ldapd
+authconfig --enableldap --enableldapauth --ldapserver=dlp.server.world --ldapbasedn="dc=example,dc=com" --enablemkhomedir --update
+systemctl restart nslcd
+systemctl enable nslcd
+#-- withTLS --#
+yum -y install openldap-clients nss-pam-ldapd
+echo "TLS_REQCERT allow" >> /etc/openldap/ldap.conf
+echo "tls_reqcert allow" >> /etc/nslcd.conf
+scp ldap.example.com:/etc/openldap/certs/cacert.pem /etc/openldap/cacerts
+authconfig --enableldap --enableldapauth --enableldaptls --ldapserver=dlp.server.world --ldapbasedn="dc=example,dc=com" --enablemkhomedir --update
+systemctl restart nslcd
+systemctl enable nslcd
+
+
+### Configure SAMBA ###
+yum -y install samba samba-client
+cp /usr/share/doc/samba-4.2.3/LDAP/samba.ldif /etc/openldap/schema/
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/samba.ldif
+vi samba_indexes.ldif
+代碼: [選擇]
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcDbIndex
+olcDbIndex: uidNumber eq
+olcDbIndex: gidNumber eq
+olcDbIndex: loginShell eq
+olcDbIndex: uid eq,pres,sub
+olcDbIndex: memberUid eq,pres,sub
+olcDbIndex: uniqueMember eq,pres
+olcDbIndex: sambaSID eq
+olcDbIndex: sambaPrimaryGroupSID eq
+olcDbIndex: sambaGroupType eq
+olcDbIndex: sambaSIDList eq
+olcDbIndex: sambaDomainName eq
+olcDbIndex: default sub
+
+ldapmodify -Y EXTERNAL -H ldapi:/// -f samba_indexes.ldif
+systemctl restart slapd
+
+
+### Configure openldap-tools ###
+rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+yum install -y install smbldap-tools
+cd /etc/samba
+mv smb.conf smb.conf.bak
+cp /usr/share/doc/smbldap-tools-*/smb.conf smb.conf
+vi /etc/samba/smb.conf
+代碼: [選擇]
+
+[global]
+	workgroup = EXAMPLE
+	netbios name = ldap
+	deadtime = 10
+	log level = 1
+	log file = /var/log/samba/log.%m
+	max log size = 5000
+	debug pid = yes
+	debug uid = yes
+	syslog = 0
+	utmp = yes
+	security = user
+	domain logons = yes
+	os level = 64
+	logon path =
+	logon home =
+	logon drive =
+	logon script =
+	passdb backend = ldapsam:"ldap://ldap.example.com/"
+	ldap ssl = no
+	ldap admin dn = cn=Manager,dc=example,dc=com
+	ldap delete dn = no
+	ldap password sync = yes
+	ldap suffix = dc=example,dc=com
+	ldap user suffix = ou=People
+	ldap group suffix = ou=Group
+	ldap machine suffix = ou=Computers
+	ldap idmap suffix = ou=Idmap
+	add user script = /usr/sbin/smbldap-useradd -m '%u' -t 1
+	rename user script = /usr/sbin/smbldap-usermod -r '%unew' '%uold'
+	delete user script = /usr/sbin/smbldap-userdel '%u'
+	set primary group script = /usr/sbin/smbldap-usermod -g '%g' '%u'
+	add group script = /usr/sbin/smbldap-groupadd -p '%g'
+	delete group script = /usr/sbin/smbldap-groupdel '%g'
+	add user to group script = /usr/sbin/smbldap-groupmod -m '%u' '%g'
+	delete user from group script = /usr/sbin/smbldap-groupmod -x '%u' '%g'
+	add machine script = /usr/sbin/smbldap-useradd -w '%u' -t 1
+	admin users = domainadmin
+[NETLOGON]
+	path = /var/lib/samba/netlogon
+	browseable = no
+	share modes = no
+[PROFILES]
+	path = /var/lib/samba/profiles
+	browseable = no
+	writeable = yes
+	create mask = 0611
+	directory mask = 0700
+	profile acls = yes
+	csc policy = disable
+	map system = yes
+	map hidden = yes
+[homes]
+	comment = Home Directories
+	browseable = no
+	writable = yes
+
+mkdir /var/lib/samba/{netlogon,profiles}
+smbpasswd -W    # type the passwor of ldap manager twice
+system start nmb
+system start smb
+system enable nmb
+system enable smb
+smbldap-config
+    # Answer all the question down to the way
+    # You could however press ctrl-c and reload the command if you made a mistake
+smbldap-populate
+smbldap-groupadd -a domainadmin
+smbldap-useradd -am -g domainadmin domainadmin
+smbldap-passwd domainadmin
+
+### To add a Win7 client ###
+smbldap-useradd -W win7pchttps://wiki.samba.org/index.php/Required_settings_for_NT4-style_domains
+
+### Win7 modification ###
+# Edit a text file named 'sambafix.reg'
+代碼: [選擇]
+
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanManWorkstation\Parameters]
+
+"DomainCompatibilityMode"=dword:00000001
+"DNSNameResolutionRequired"=dword:00000000
+
+# Double click the file to import the registry
+# Reboot and join the 'EXAMPLE' domain using domainadmin or root account
+« 上次編輯: 2016-01-30 22:55 由 netman »
