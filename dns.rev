@@ -1,0 +1,18 @@
+$TTL 1D
+@	IN SOA	 kdns.strix.com.ve. root.strix.com.ve. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+
+@                       IN      NS      kdns.strix.com.ve.
+@                       IN      A       192.168.0.112
+@			IN	PTR	strix.com.ve.
+112			IN	PTR	kdns.strix.com.ve.
+21                      IN      PTR     drotaca-test.strix.com.ve.
+71			IN	PTR	db1.strix.com.ve.
+55			IN	PTR	strixerp-local.strix.com.ve.
+66	                IN      PTR     amazonas.strix.com.ve.
+77		        IN      PTR     poraqui-api.strix.com.ve.
+114			IN	PTR	smbldap.strix.com.ve.
