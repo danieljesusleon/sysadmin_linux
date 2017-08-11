@@ -1,0 +1,236 @@
+  init 0
+  nmtui
+  reboot
+  yum install vim-enhanced
+  vi /etc/resolv.conf 
+  vi /etc/hosts
+  yum install vim-enhanced -y
+  yum install iscsi-initiator-utils -y
+  yum install samba-client cifs-utils -y
+  vim /etc/resolv.conf 
+  nslookup client1.example.com
+  yum provides nslookup
+  dig
+  vim /etc/resolv.conf 
+  yum provides nslookup
+  kill -9 9476
+  yum provides nslookup
+  yum install -y bind-utils
+  vim /etc/resolv.conf 
+  nslookup client1.example.com
+  nmtui
+  systemctl restart network
+  vim /etc/hosts
+  nmtui
+  w
+  ip addr
+  service network restart
+  init 0
+  history 
+  init 0
+  history 
+  ip addr
+  history  |less
+  init 0
+  hostnamectl set-hostname "smbldap.strix.com.ve"
+  hostnamectl 
+  vim /etc/resolv.conf 
+  init 6
+  cat /etc/resolv.conf 
+  vim /etc/sysconfig/network-scripts/ifcfg-enp0s3 
+  init 6
+  cat /etc/resolv.conf 
+  yum -y install net-tools
+  ifconfig 
+  systemctl status sshd
+  history |less
+  firewall-cmd --list-all
+  clear
+  exit
+  smbclient //127.0.0.1/prueba -u prueba
+  smbclient //127.0.0.1/prueba -U prueba
+  smbclient //127.0.0.1/admin -U dimitrio
+  exit
+  clear
+  yum -y install openldap-servers openldap-clients
+  cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG 
+  chown ldap. /var/lib/ldap/DB_CONFIG 
+  systemctl slapd
+  systemctl start slapd
+  systemctl enable slapd
+  slappasswd 
+  echo "{SSHA}WHTLMbRgXt3T2njlD2g8RBmXy8n9RqbG" > ldappassword
+  mkdir tmp
+  cd tmp/
+  vim chrootpw.ldif
+  ldapadd -Y EXTERNAL -H ldapi:/// -f chrootpw.ldif
+  for i in /etc/openldap/schema/*.ldif; do ldapadd -Y EXTERNAL -H ldapi:/// -f $i ; done
+  vi chdomain.ldif
+  cat ../ldappassword >> chdomain.ldif 
+  vi chdomain.ldif
+  ldapmodify -Y EXTERNAL -H ldapi:/// -f chdomain.ldif
+  vim basedomain.ldif
+  vi chdomain.ldif
+  ldapadd -x -D cn=Manager,dc=strix,dc=com,dc=ve -W -f basedomain.ldif
+  systemctl restart slapd
+  systemctl status slapd
+  systemctl status slapd -l
+  systemctl enable slapd
+  systemctl status slapd -l
+  yum -y install openldap-clients nss-pam-ldapd
+  authconfig --enableldap --enableldapauth --ldapserver=smbldap.strix.com.ve --ldapbasedn="dc=strix,dc=com,dc=ve" --enablemkhomedir --update
+  systemctl restart nslcd
+  systemctl status nslcd
+  yum -y install samba samba-client
+  cp /usr/share/doc/samba-4.2.3/LDAP/samba.ldif /etc/openldap/schema/
+  cp /usr/share/doc/samba-4.4.4/LDAP/samba.ldif /etc/openldap/schema/
+  cat /etc/openldap/schema/samba.ldif 
+  cat /etc/openldap/schema/samba.ldif |grep example
+  cat /etc/openldap/schema/samba.ldif |grep server
+  ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/samba.ldif 
+  vi samba_indexes.ldif
+  ldapmodify -Y EXTERNAL -H ldapi:/// -f samba_indexes.ldif
+  systemctl restart slapd
+  rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+  rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+  yum install -y install smbldap-tools
+  cd /etc/samba/
+  ls
+  mv smb.conf smb.conf.bak
+  cp /usr/share/doc/smbldap-tools-*/smb.conf smb.conf 
+  cp /usr/share/doc/smbldap-tools-0.9.11/smb.conf smb.conf 
+  cp /usr/share/doc/smbldap-tools-0.9.11/smb.conf.example smb.conf 
+  vim smb.conf
+  mkdir /var/lib/samba/{netlogon,profiles}
+  smbpasswd -W 
+  ifconfig 
+  systemctl start nmb
+  systemctl start smb
+  systemctl enable nmb
+  systemctl enable smb
+  smbldap-config 
+  vim /etc/smbldap-tools/smbldap.conf
+  vim /etc/smbldap-tools/smbldap_bind.conf
+  smbldap-populate 
+  smbldap-groupadd -a domainadmin 
+  smbldap-useradd -am -g domainadmin domainadmin
+  smbldap-passwd domainadmin 
+  ls /home/
+  smbclient -L //localhost/ -U domainadmin
+  smbclient -L //localhost/ -U domainadmin -d 3
+  clear
+  yum search phpldapadmin
+  yum install phpldapadmin
+  systemctl enable httpd
+  systemctl start httpd
+  systemctl status httpd
+  vi /etc/httpd/conf.d/phpldapadmin.conf
+  systemctl restart httpd.service
+  firewall-cmd --permanent --add-service=httpd
+  firewall-cmd --permanent --add-service=http
+  firewall-cmd --reload
+  vim /etc/phpldapadmin/config.php 
+  setsebool -P httpd_can_connect_ldap on 
+  getsebool -a |grep hhtpd
+  getsebool -a |grep hhtp
+  getsebool -a 
+  smbldap-useradd 
+  man smbldap-groupadd 
+  smbldap-groupadd prueba
+  smbstatus 
+  smbtree 
+  smbldap-groupdel prueba
+  man smbldap-groupadd
+  ls /usr/share/doc/smbldap-tools-0.9.11/
+  ls /usr/share/doc/smbldap-tools-0.9.11/migration_scripts/
+  vim /usr/share/doc/smbldap-tools-0.9.11/README 
+  smbldap-groupadd -t 2 prueba
+  smbldap-useradd -am prueba
+  smbldap-userdel prueba
+  smbldap-useradd -am -g prueba prueba
+  getent passwd
+  getent group
+  smbldap-useradd -am -g prueba prueba
+  smbldap-groupdel prueba
+  getent group
+  smbldap-useradd -am -g prueba prueba
+  smbldap-groupadd -t 2 prueba
+  smbldap-useradd -am -g prueba prueba
+  smbldap-groupdel prueba
+  smbldap-userdel prueba
+  smbldap-groupadd -a prueba
+  smbldap-useradd -am -g prueba prueba
+  smbldap-passwd prueba
+  smbclient -L //localhost -U prueba
+  pwd
+  whoami
+  smbldap-groupadd -a administration
+  smbldap-groupadd -a finance
+  smbldap-groupadd -a marketing
+  smbldap-groupadd -a systems
+  smbldap-groupadd -a public
+  smbldap-useradd -am -g administration dimitrio
+  smbldap-useradd -am -g finance hugbel
+  smbldap-useradd -am -g marketing earle
+  smbldap-useradd -am -g systems -G administration,finance,marketing dleon
+  smbldap-passwd dimitrio
+  smbldap-passwd hugbel
+  smbldap-passwd earle
+  smbldap-passwd dleon
+  vim /etc/samba/smb.conf
+  mkdir /{administration,finance,marketing,systems,public}
+  ls /
+  vim /etc/samba/smb.conf
+  testparm 
+  vim /etc/samba/smb.conf
+  testparm 
+  systemctl restart smb
+  smbclient -L //localhost/admin -U dimitrio
+  pwd
+  smbclient -L //localhost/finance -U hugbel
+  smbclient -L //localhost/marketing -U earle
+  smbclient -L //localhost/systems -U dleon
+  smbclient -L //localhost/finance -U dleon
+  smbclient -L //localhost/marketing -U dleon
+  smbclient -L //localhost/admin -U dleon
+  smbclient -L //localhost/admin -U hugbel
+  getent group
+  ls
+  vim smb.conf
+  smbclient -L //localhost/admin -U dimitrio
+  ls
+  smbstatus 
+  smbtree 
+  firewall-cmd --list-all
+  firewall-cmd --permanent --aad-service=samba
+  firewall-cmd --permanent --add-service=samba
+  firewall-cmd --reload
+  firewall-cmd --list-all
+  firewall-cmd --permanent --add-service=slapd
+  firewall-cmd --permanent --add-service=ldap
+  firewall-cmd --reload
+  ls -l /
+  getent group
+  chown .administration /administration/
+  chown .finance /finance/
+  chown .marketing /marketing/
+  chown .systems /systems/
+  chmod 770 /public/
+  ls -l
+  ls -l /
+  getsebool -a
+  setsebool -P samba_export_all_ro on
+  setsebool -P samba_export_all_rw on
+  setsebool -P samba_enable_home_dirs on
+  setsebool -P samba_create_home_dirs on
+  reboot
+  su - hugbel
+  ls -ld /finance/
+  chmod g+w /finance/
+  su - hugbel
+  chmod g+w /administration/
+  chmod g+w /marketing/
+  chmod g+w /systems/
+  su - dimitrio
+  getfacl /administration/
+  history > commands_smbldap
