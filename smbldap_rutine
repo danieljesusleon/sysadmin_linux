@@ -16,7 +16,6 @@ slappasswd # copy the result
 mkdir /root/tmp
 cd /root/tmp
 vi chrootpw.ldif
-代碼: [選擇]
 
 dn: olcDatabase={0}config,cn=config
 changetype: modify
@@ -26,7 +25,6 @@ olcRootPW: {SSHA}xxxxxxxxxxxxxxxxxxxxxxxx
 ldapadd -Y EXTERNAL -H ldapi:/// -f chrootpw.ldif
 for i in /etc/openldap/schema/*.ldif; do ldapadd -Y EXTERNAL -H ldapi:/// -f $i ; done
 vi chdomain.ldif
-代碼: [選擇]
 
 dn: olcDatabase={1}monitor,cn=config
 changetype: modify
@@ -59,7 +57,6 @@ olcAccess: {2}to * by dn="cn=Manager,dc=example,dc=com" write by * read
 
 ldapmodify -Y EXTERNAL -H ldapi:/// -f chdomain.ldif
 vi basedomain.ldif
-代碼: [選擇]
 
 dn: dc=example,dc=com
 objectClass: top
@@ -92,7 +89,6 @@ cd /etc/openldap/certs/
 chown ldap. ldap.example.com.* ca.crt
 cd /root/tmp
 vi mod_ssl.ldif
-代碼: [選擇]
 
 dn: cn=config
 changetype: modify
@@ -107,7 +103,6 @@ olcTLSCertificateKeyFile: /etc/openldap/certs/ldap.example.com.key
 
 ldapmodify -Y EXTERNAL -H ldapi:/// -f mod_ssl.ldif
 vi /etc/sysconfig/slapd
-代碼: [選擇]
 
 SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"
 
@@ -137,7 +132,6 @@ yum -y install samba samba-client
 cp /usr/share/doc/samba-4.2.3/LDAP/samba.ldif /etc/openldap/schema/
 ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/samba.ldif
 vi samba_indexes.ldif
-代碼: [選擇]
 
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
@@ -166,7 +160,6 @@ cd /etc/samba
 mv smb.conf smb.conf.bak
 cp /usr/share/doc/smbldap-tools-*/smb.conf smb.conf
 vi /etc/samba/smb.conf
-代碼: [選擇]
 
 [global]
 	workgroup = EXAMPLE
@@ -244,7 +237,6 @@ smbldap-useradd -W win7pchttps://wiki.samba.org/index.php/Required_settings_for_
 
 ### Win7 modification ###
 # Edit a text file named 'sambafix.reg'
-代碼: [選擇]
 
 Windows Registry Editor Version 5.00
 
@@ -255,4 +247,3 @@ Windows Registry Editor Version 5.00
 
 # Double click the file to import the registry
 # Reboot and join the 'EXAMPLE' domain using domainadmin or root account
-« 上次編輯: 2016-01-30 22:55 由 netman »
