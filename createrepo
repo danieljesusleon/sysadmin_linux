@@ -1,0 +1,12 @@
+ls -l /dev/sr0		(if the media is located in crom/dvd)
+mount /dev/sr0 /mnt
+cd /etc/yum.repos.d/
+vim rhel.repo
+	append the following information:
+	[rhel_local]
+	name=rhel_local
+	baseurl=file:///mnt or path to repositories
+	enable=1
+	gpgcheck=0
+	gpgkeyfile=
+yum repolist
