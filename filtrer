@@ -1,0 +1,23 @@
+  1 #!/bin/bash
+  2 echo "Ingrese el código de producto"
+  3 read code
+  4 echo $code > pattern.txt
+  5 characters=$( wc -c pattern.txt |awk -F"[[:space:]]" '{print$1}')
+  6 if [ $characters = 13 ];then
+  7   cat FACMES.txt |grep -v "$code" > filtrado.txt
+  8 else
+  9   echo "ingrese un codigo valido de 12 digitos, por favor"
+ 10 fi
+ 11 rm -f pattern.txt
+
+ #!/bin/bash
+  2 echo "enter the code"
+  3 read code
+  4 while IFS='' read -r line || [[ -n "$line" ]]; do
+  5   pattern=${line:0:12}
+  6   if  [ $pattern = $code ];then
+  7     echo $line |sed  "/$code/d"
+  8     else
+  9     echo $line >> outputfile.txt
+ 10   fi
+ 11 done < "$1"
