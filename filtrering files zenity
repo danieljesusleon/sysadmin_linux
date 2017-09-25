@@ -1,0 +1,69 @@
+#!/bin/bash
+#function to query code
+function menuquestion {
+  zenity --question --title="Filtro de productos" --text="Filtrar por codigo?" 2>/dev/null
+  option=$(echo $?) 2>/dev/null
+#  echo $option
+}
+function inputfile {
+  FILE=`zenity --file-selection --title="Seleccione un archivo para filtrar"` 2>/dev/null
+    #  FILE=`zenity --entry --title="Archivo para filtrar" --text="Por favor escriba el nombre del archivo"`
+#    echo $FILE > ruta
+}
+function querycode {
+  CODE=`zenity --entry --title="Codigo del producto" --text="Ingrese el codigo del producto" |gawk -F"|" '{print$1}'` 2>/dev/null
+#    echo $CODE
+}
+function parsepath {
+    it=$(cat ruta |gawk -F"\\" '{ print NF }')
+    COUNTER=1
+    while [  $COUNTER -lt $it ]; do
+    sed -i 's/\\/\//' ruta
+    let COUNTER=COUNTER+1
+    done
+#    cat ruta
+}
+#function pathout {
+#    it=$(cat ruta |gawk -F"\\" '{ print NF }')
+#    COUNTER=1
+#    while [  $COUNTER -lt $it ]; do
+#    cat ruta|cut -d"/" -f $it >> pathout.txt
+#    let COUNTER=COUNTER+1
+#    done
+#    cat ruta
+#}
+function filtred {
+  TEXT=$(echo $FILE |gawk -F"\\" '{print$it}')
+#    echo $TEXT
+    cat $TEXT |grep -v "$CODE" > filtrado.txt
+}
+menuquestion
+while [ $option = "0" ];do
+    inputfile
+        if [ -z "$FILE" ];then
+            zenity --error --text "Debe seleccionar un archivo" 2>/dev/null
+        else
+            parsepath
+        querycode
+                if [ -z "$CODE" ];then
+                    zenity --error --text="Debe ingresar un codigo" 2>/dev/null
+        else
+#                    echo $CODE
+                    echo "$CODE" > pattern.txt
+                      CHARACTERS=$(wc -c pattern.txt |awk -F"[[:space:]]" '{print$1}')
+#                    echo $CHARACTERS
+#                    PATTERN=`expr $CHARACTERS - 2`
+#                    echo $PATTERN
+                     if [ -z $CHARACTERS ];then
+                            zenity --error --text "Ingrese un codigo valido, por favor" 2>/dev/null
+                            querycode
+                        else
+                            filtred
+                            zenity --info --text="El archivo fue filtrado, y se encuentra ahora en su escritorio" 2>/dev/null
+                        fi
+                fi
+        fi
+rm -f pattern.txt
+#mv filtrado.txt C:/Users/Administrator/Desktop
+menuquestion
+done
