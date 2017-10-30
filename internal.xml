@@ -1,0 +1,8 @@
+<network>
+  <name>internal</name>
+  <bridge name='virbr1' stp='on' delay='0' />
+  <mac address='52:54:00:05:4e:d3'/>
+  <domain name='internal'/>
+  <ip address='10.11.1.1' netmask='255.255.255.0'>
+  </ip>
+</network>
