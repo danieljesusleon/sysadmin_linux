@@ -1,0 +1,3 @@
+#!/bin/bash
+
+mount -t cifs  //server_ip/share /backup/ -o username=admin,rw,password=password
